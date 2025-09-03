@@ -8,8 +8,14 @@ public interface IUserDao {
 	
 	UserModel findById(int id);
 	
-	void insert(UserModel user);
-	
+    int insert(UserModel user); 
+    
 	UserModel findByUsername (String username);
+	
+    UserModel findByEmail(String email);
+    int upsertResetToken(int userId, String token, int expireMinutes);
+    boolean isResetTokenExpired(String token);
+    int updatePasswordByToken(String token, String newHashedPassword);
+
 
 }

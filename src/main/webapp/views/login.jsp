@@ -79,12 +79,15 @@ body {
 			<input type="text" name="username" placeholder="Tên đăng nhập"
 				required> <input type="password" name="password"
 				placeholder="Mật khẩu" required> <label><input
-				type="checkbox" name="remember"> Ghi nhớ đăng nhập</label>
+				type="checkbox" name="remember"> Ghi nhớ đăng nhập</label> <a
+				class="forgot-link" href="${pageContext.request.contextPath}/forgot">Quên
+				mật khẩu?</a>
+
 			<button type="submit">Đăng nhập</button>
 		</form>
 
 		<!-- Nút sang trang đăng ký -->
-		<a href="${pageContext.request.contextPath}/Register.jsp"
+		<a href="${pageContext.request.contextPath}/views/register.jsp"
 			class="register-btn">Đăng ký tài khoản</a>
 
 		<p class="alert">${alert}</p>
