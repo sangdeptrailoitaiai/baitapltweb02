@@ -29,44 +29,48 @@ public class LoginController extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 	        throws ServletException, IOException {
+
 	    req.setCharacterEncoding("UTF-8");
-	    resp.setCharacterEncoding("UTF-8");
 
 	    String username = req.getParameter("username");
 	    String password = req.getParameter("password");
 
-	    if (username == null || password == null) {
-	        req.setAttribute("alert", "Thiếu trường username/password");
-	        req.getRequestDispatcher("/views/login.jsp").forward(req, resp);
-	        return;
-	    }
-	    username = username.trim();
-	    password = password.trim();
-
-	    if (username.isEmpty() || password.isEmpty()) {
+	    if (username == null || password == null || username.isBlank() || password.isBlank()) {
 	        req.setAttribute("alert", "Tài khoản hoặc mật khẩu không được rỗng");
 	        req.getRequestDispatcher("/views/login.jsp").forward(req, resp);
-	        return;
+	        return; // <-- bắt buộc
 	    }
 
-	    UserModel user = service.login(username, password); // bên dưới nhớ xử lý hash/trim
-
-	    if (user != null) {
-	        HttpSession session = req.getSession(true);
-	        session.setAttribute("account", user);
-
-	        if ("on".equals(req.getParameter("remember"))) {
-	            Cookie cookie = new Cookie(Constant.COOKIE_REMEMBER, username);
-	            cookie.setMaxAge(30 * 24 * 60 * 60); // 30 ngày
-	            cookie.setPath(req.getContextPath().isEmpty() ? "/" : req.getContextPath());
-	            resp.addCookie(cookie);
-	        }
-	        resp.sendRedirect(req.getContextPath() + "/waiting");
-	    } else {
+	    var user = service.login(username.trim(), password.trim());
+	    if (user == null) {
 	        req.setAttribute("alert", "Tài khoản hoặc mật khẩu không đúng");
 	        req.getRequestDispatcher("/views/login.jsp").forward(req, resp);
+	        return; // <-- bắt buộc
 	    }
+
+	    // Đăng nhập OK
+	    HttpSession session = req.getSession(true);
+	    session.setAttribute("account", user);
+
+	    // (tùy chọn) remember me...
+	    if ("on".equals(req.getParameter("remember"))) {
+	        Cookie ck = new Cookie(Constant.COOKIE_REMEMBER, username.trim());
+	        ck.setMaxAge(30 * 24 * 60 * 60);
+	        ck.setPath(req.getContextPath().isEmpty() ? "/" : req.getContextPath());
+	        resp.addCookie(ck);
+	    }
+
+	    String target;
+	    switch (user.getRoleid()) {
+	        case 2:  target = "/admin/home";   break; // admin
+	        case 3:  target = "/manager/home"; break; // manager
+	        default: target = "/user/home";    break; // user
+	    }
+
+	    resp.sendRedirect(req.getContextPath() + target);
+	    return; // <-- kết thúc hẳn doPost
 	}
+
 
 
 }
